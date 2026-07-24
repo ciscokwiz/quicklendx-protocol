@@ -37,6 +37,20 @@ impl InvoiceStatus {
     }
 }
 
+/// Invoice lock state controlled by admin holds.
+#[contracttype]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum InvoiceLock {
+    None,
+    Frozen,
+}
+
+impl InvoiceLock {
+    pub fn is_locked(&self) -> bool {
+        *self != Self::None
+    }
+}
+
 /// Bid status enumeration
 #[contracttype]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -150,6 +164,31 @@ pub struct InvoiceRating {
     pub score: u32, // 1-5
     pub comment: String,
     pub timestamp: u64,
+}
+
+/// Freeze reason enumeration representing why a business invoice was frozen
+#[contracttype]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum BusinessFreezeReason {
+    /// Generic administrative freeze (admin's discretion)
+    AdminAction,
+    /// Business KYC was rejected or revoked
+    KYCRejected,
+    /// Legal or compliance policy violation
+    ComplianceViolation,
+    /// Fraud or suspicious activity detected
+    SuspiciousActivity,
+    /// Court order or legal hold applied
+    LegalHold,
+}
+
+/// Freeze record stored alongside the frozen flag on an invoice
+#[contracttype]
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct FreezeInfo {
+    pub reason: BusinessFreezeReason,
+    pub frozen_by: Address,
+    pub frozen_at: u64,
 }
 
 /// Core Invoice data structure
